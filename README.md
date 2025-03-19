@@ -1,5 +1,12 @@
 # Gilbert Kristian - Adpro A - 2306274951
 
+- [Milestone 1](#milestone-1-single-threaded-web-server)
+- [Milestone 2](#milestone-2-returning-html)
+- [Milestone 3](#milestone-3-validating-request-and-selectively-responding)
+- [Milestone 4](#milestone-4-simulation-slow-response)
+- [Milestone 5](#milestone-5-multithreaded-server)
+- [Bonus](#bonnu)
+
 ## Milestone 1: Single-Threaded Web Server  
 
 In creating a single-threaded web server, two main protocols are involved: **Hypertext Transfer Protocol (HTTP)** and **Transmission Control Protocol (TCP)**. The fundamental principle of these protocols follows a **request-response** model, where the server receives and responds to client requests.  
@@ -103,7 +110,7 @@ I noticed that when making a request to the root path /, it has to wait until th
 
 In this milestone, I transformed my web server from single-threaded to multi-threaded. I used a ThreadPool to manage multiple threads available for handling incoming tasks.
 
-## My Implementation
+## Implementations
 
 Initially, my ThreadPool only stored Worker structures, each containing a `JoinHandle<()> `for individual threads. To create a multithreaded implementation, I updated the ThreadPool to store a vector of these Workers.
 
@@ -116,10 +123,82 @@ When creating the ThreadPool:
 - I stored the sender in the ThreadPool
 - I copied the receiver to each Worker
 
-## My Task Execution Process
+## Task Execution Process
 
 The closures received by my `execute` method are sent through the channel sender to be executed by one of the available threads. My Workers continuously request tasks from the receiver channel and run them in a loop, using mutexes to avoid race conditions.
 
-## Benefits of My Approach
+## Benefits
 
 This implementation allows my ThreadPool to efficiently handle many tasks concurrently while maintaining an appropriate number of threads to minimize overhead. The channel system I implemented ensures safe task distribution among the available threads.
+
+# Bonus
+
+## Overview
+
+In this bonus improvement, I've implemented a `build` function in the ThreadPool implementation that represents a more robust alternative to the `new` constructor. While both functions create a ThreadPool with worker threads, they differ significantly in their error handling approaches.
+
+## Key Differences
+
+The `new` function uses `assert!` to panic if invalid parameters are provided (like a zero-sized pool), following Rust's convention that constructors named "new" should not fail. In contrast, the `build` function returns a `Result<ThreadPool, PoolCreationError>`, allowing calling code to handle creation failures gracefully rather than causing program termination.
+
+## Implementation Details
+
+Here's the implementation of the `build` function:
+
+```rust
+pub fn build(size: usize) -> Result<ThreadPool, PoolCreationError> {
+    if size == 0 {
+        return Err(PoolCreationError::ZeroSize);
+    }
+    
+    let (sender, receiver) = mpsc::channel();
+    let receiver = Arc::new(Mutex::new(receiver));
+    
+    let workers = (0..size)
+        .map(|id| Worker::new(id, Arc::clone(&receiver)))
+        .collect::<Vec<Worker>>();
+        
+    Ok(ThreadPool { workers, sender })
+}
+```
+
+## Improvements
+
+This implementation introduces several important improvements:
+
+- **Result Return Type**: The function returns a `Result<ThreadPool, PoolCreationError>` instead of directly returning a ThreadPool, following Rust's convention for operations that might fail
+- **Custom Error Type**: I've created a dedicated `PoolCreationError` enum to represent different failure modes
+- **Explicit Error Handling**: Instead of using `assert!` which causes a panic, the function returns an `Err` variant when invalid parameters are provided
+- **Functional Style**: The worker creation uses a more functional approach with `map` and `collect` instead of imperative loop construction
+
+## Usage
+
+The `main.rs` file has been updated to use this new function:
+
+```rust
+let pool = ThreadPool::build(4).expect("Failed to create ThreadPool!");
+```
+
+This change shows how the caller can now handle potential creation failures. In this case, it still uses `expect` to terminate with a custom message if the pool creation fails, but in production code, proper error handling could be implemented.
+
+## Error Type
+
+I've also introduced a proper error type:
+
+```rust
+#[derive(Debug)]
+pub enum PoolCreationError {
+    ZeroSize,
+}
+```
+
+The `#[derive(Debug)]` attribute automatically implements the Debug trait, making the error printable and easier to work with during debugging.
+
+## Summary of Improvements
+
+At this stage, the server has made these additional improvements:
+
+- It follows Rust's error handling best practices with `Result` types
+- It provides a more robust alternative to thread pool creation
+- It uses a custom error type for clearer error reporting
+- It maintains all the concurrency benefits from the previous milestone

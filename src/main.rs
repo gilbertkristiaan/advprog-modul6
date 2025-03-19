@@ -2,7 +2,7 @@ use std::{
     fs,
     io::{prelude::*, BufReader},
     net::{TcpListener, TcpStream},
-    thread,
+    thread, 
     time::Duration,
 };
 
@@ -10,11 +10,11 @@ use hello::ThreadPool;
 
 fn main() {
     let listener = TcpListener::bind("127.0.0.1:7878").unwrap();
-    let pool = ThreadPool::new(4);
+    let pool = ThreadPool::build(4).expect("Failed to create ThreadPool!");
 
-    for stream in listener.incoming() {
+    for stream in listener.incoming() { 
         let stream = stream.unwrap();
-
+        
         pool.execute(|| {
             handle_connection(stream);
         });
@@ -32,11 +32,10 @@ fn handle_connection(mut stream: TcpStream) {
             ("HTTP/1.1 200 OK", "hello.html")
         }
         _ => ("HTTP/1.1 404 NOT FOUND", "404.html"),
-    };
-
-    let contents = fs::read_to_string(filename).unwrap();
+    }; 
+    let contents = fs::read_to_string(filename).unwrap(); 
     let length = contents.len();
-
+    
     let response = format!(
         "{status_line}\r\nContent-Length: {length}\r\n\r\n{contents}"
     );
