@@ -24,7 +24,7 @@ To manage how the server responds to browser requests, the `handle_connection()`
 - The **http_request** variable collects the HTTP request lines received from the browser.  
 
 
-# Milestone 2: Returning HTML
+## Milestone 2: Returning HTML
 Screenshot : 
 ![screenshot](/assets/images/commit_html.png)
 
