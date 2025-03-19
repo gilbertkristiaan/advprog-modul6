@@ -67,3 +67,34 @@ To resolve this, I used:
 let (status_line, filename) = ...
 ```
 This ensures that both variables are accessible outside the conditional blocks, improving maintainability and readability.
+
+## Milestone 4: Simulation Slow Response
+
+In this implementation, we will simulate a slow response from our web server. This demonstration allows us to observe how a delayed response affects other concurrent requests to the server.
+
+## Implementation Details
+
+The simulation utilizes two key components:
+
+1. **Thread Sleep Function**: We employ the `thread::sleep` function to intentionally pause the program execution for a specified duration.
+
+2. **Request Matching**: A `match` statement examines the request line received from the client to determine the appropriate response action.
+
+## Request Handling Logic
+
+When the server receives a request with the path "/sleep" (specifically "GET /sleep HTTP/1.1"), it will:
+
+1. Pause execution for 10 seconds using the sleep function
+2. Then deliver the response to the client
+
+This delay simulates a slow-responding endpoint that would be encountered in real-world scenarios.
+
+## Observation Method
+
+To observe the impact of the slow response:
+
+1. Open two browser windows simultaneously
+2. In one window, navigate to the "/sleep" endpoint
+3. In the second window, immediately navigate to the root endpoint "/"
+
+I noticed that when making a request to the root path /, it has to wait until the /sleep request finishes its 10-second delay before receiving a response. This clearly shows that my current server processes requests sequentially, meaning a slow request can block others from being handled. This experience highlights the drawback of using a single-threaded server model when dealing with multiple concurrent requests.
