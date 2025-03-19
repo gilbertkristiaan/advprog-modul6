@@ -98,3 +98,28 @@ To observe the impact of the slow response:
 3. In the second window, immediately navigate to the root endpoint "/"
 
 I noticed that when making a request to the root path /, it has to wait until the /sleep request finishes its 10-second delay before receiving a response. This clearly shows that my current server processes requests sequentially, meaning a slow request can block others from being handled. This experience highlights the drawback of using a single-threaded server model when dealing with multiple concurrent requests.
+
+## Milestone 5: Multithreaded Server
+
+In this milestone, I transformed my web server from single-threaded to multi-threaded. I used a ThreadPool to manage multiple threads available for handling incoming tasks.
+
+## My Implementation
+
+Initially, my ThreadPool only stored Worker structures, each containing a `JoinHandle<()> `for individual threads. To create a multithreaded implementation, I updated the ThreadPool to store a vector of these Workers.
+
+For each Worker, I included:
+- A unique ID
+- A thread initialized with an empty closure
+
+When creating the ThreadPool:
+- I established a channel
+- I stored the sender in the ThreadPool
+- I copied the receiver to each Worker
+
+## My Task Execution Process
+
+The closures received by my `execute` method are sent through the channel sender to be executed by one of the available threads. My Workers continuously request tasks from the receiver channel and run them in a loop, using mutexes to avoid race conditions.
+
+## Benefits of My Approach
+
+This implementation allows my ThreadPool to efficiently handle many tasks concurrently while maintaining an appropriate number of threads to minimize overhead. The channel system I implemented ensures safe task distribution among the available threads.
