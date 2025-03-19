@@ -5,7 +5,7 @@
 - [Milestone 3](#milestone-3-validating-request-and-selectively-responding)
 - [Milestone 4](#milestone-4-simulation-slow-response)
 - [Milestone 5](#milestone-5-multithreaded-server)
-- [Bonus](#bonnu)
+- [Bonus](#bonus)
 
 ## Milestone 1: Single-Threaded Web Server  
 
@@ -46,7 +46,7 @@ In this milestone, the **`handle_connection`** function is enhanced to return an
 
 Once the response is fully prepared, it is written to the **TCP stream** using the `write_all` method, ensuring that the browser receives and renders the HTML correctly.  
 
-## Milestone 3: Request Validation and Conditional Response Handling
+## Milestone 3: Validating Request and Selectively Responding
 
 Screenshot:
 ![Commit 3 screen capture](/assets/images/commit3.png)
