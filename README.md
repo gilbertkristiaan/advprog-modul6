@@ -26,7 +26,7 @@ To manage how the server responds to browser requests, the `handle_connection()`
 
 ## Milestone 2: Returning HTML
 Screenshot : 
-![screenshot](/assets/images/commit_html.png)
+![Commit 2 screen capture](/assets/images/commit2.png)
 
 In this milestone, the **`handle_connection`** function is enhanced to return an HTML response. This is done by reading an HTML file from disk and sending its contents as part of the server's response.  
 
@@ -38,3 +38,32 @@ In this milestone, the **`handle_connection`** function is enhanced to return an
 - Finally, the actual **HTML content** is appended as the response **body**.  
 
 Once the response is fully prepared, it is written to the **TCP stream** using the `write_all` method, ensuring that the browser receives and renders the HTML correctly.  
+
+## Milestone 3: Request Validation and Conditional Response Handling
+
+Screenshot:
+![Commit 3 screen capture](/assets/images/commit3.png)
+
+The web server would display `hello.html` regardless of the request. We have now enhanced its functionality to verify whether the browser is requesting the root path (`/`) before returning the HTML file. If the request does not match this path, the server will return a response with a `404` status code and an appropriate error HTML page. The implementation of `404.html` follows a similar approach to `hello.html`.
+
+## Request Processing
+```rust
+let request_line = buf_reader.lines().next().unwrap().unwrap();
+```
+
+This code:
+- `.lines()`: Obtains an iterator of lines from `BufReader`
+- `.next()`: Retrieves the first option from the iterator
+- First `unwrap()`: Extracts the possible `Option` from `.next()`
+- Second `unwrap()`: Extracts the possible `Result` value from the `.next()` output
+
+## Code Refactoring
+To maintain clean code principles, I refactored main.rs by extracting common variables in the if-else block.
+
+Previously, `contents` and `status_line` were defined separately within each if and else blocks, restricting their scope. 
+
+To resolve this, I used:
+```rust
+let (status_line, filename) = ...
+```
+This ensures that both variables are accessible outside the conditional blocks, improving maintainability and readability.
